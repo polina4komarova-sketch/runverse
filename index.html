@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="color-scheme" content="dark">
+<title>RunVerse</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Jura:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --display:"Jura","Inter",sans-serif;
+  --bg:#09090c; --card:#14141a; --card2:#1d1d26; --line:#2a2a35;
+  --text:#f4f4f7; --muted:#9a9aaa;
+  --grad:linear-gradient(90deg,#ff3d81,#ff8a3d,#ffd23d,#3ddc97,#2fa8ff,#7a5cff);
+  --grad2:linear-gradient(135deg,#ff3d81,#ff8a3d 45%,#7a5cff);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+b{font-weight:600}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;text-align:left}
+input{font:inherit;color-scheme:dark}
+#app{max-width:520px;margin:0 auto;min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 18px calc(130px + env(safe-area-inset-bottom));position:relative;overflow:hidden}
+.stripes{position:absolute;top:0;right:0;width:200px;height:130px;pointer-events:none;opacity:.9}
+.stripes i{position:absolute;right:0;height:5px;border-radius:3px;transform:skewX(-35deg)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;position:relative}
+.brand b{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:.3px}
+h1{margin:0;font-family:var(--display);font-size:34px;line-height:1.1;font-weight:500;position:relative;text-align:center}
+.bar{height:4px;width:96px;border-radius:2px;background:var(--grad);margin:12px auto 18px}
+.tabbar[hidden]{display:none}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:340px;display:flex;gap:4px;padding:6px;background:rgba(24,24,32,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:30px;z-index:5}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;border-radius:24px;color:var(--muted);font-size:10px;letter-spacing:.6px;text-transform:uppercase;font-weight:600;text-align:center;white-space:nowrap}
+.tabbar button.on{background:var(--grad2);color:#fff}
+.tabbar svg{width:38px;height:29px}
+.tabbar button.on .sl{stroke:#fff;opacity:.85}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-family:var(--display);font-size:16px;font-weight:600}
+.fchips{display:flex;gap:8px;overflow-x:auto;margin:12px -18px 0;padding:0 18px 4px;scrollbar-width:none}
+.fchips::-webkit-scrollbar{display:none}
+.fchip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;white-space:nowrap}
+.fchip.on{border-color:#ff3d81;background:var(--card2)}
+.day{margin:20px 2px 10px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px}
+.day::after{content:"";flex:1;height:1px;background:var(--line)}
+.ev{width:100%;display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+.ev:active{background:var(--card2)}
+.ev .time{font-family:var(--display);font-size:21px;font-weight:700;min-width:68px;background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ev .info{flex:1;min-width:0}
+.ev .info b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .info span{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:11px;border:1px solid #444455;border-radius:999px;padding:2px 9px;color:var(--muted)}
+.tag.sp{border-color:#ffd23d;color:#ffd23d}
+.ev .go{width:26px;height:26px;border-radius:50%;background:#1fbf75;color:#04140c;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.empty{color:var(--muted);text-align:center;padding:48px 20px;line-height:1.5}
+.empty big{display:block;font-size:40px;margin-bottom:8px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;margin:-6px 0 14px;position:relative}
+.sect{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin:0 2px 12px}
+.sect::after{content:"";flex:1;height:1px;background:var(--line)}
+.city,.opt{width:100%;display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px;font-size:17px;font-weight:600}
+.city{font-family:var(--display)}
+.city.on,.opt.on{border-color:#ff3d81;background:var(--card2)}
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid #555566;display:grid;place-items:center;flex:none}
+.city.on .radio,.opt.on .radio{border-color:#ff3d81}
+.city.on .radio::after,.opt.on .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:#ff3d81}
+.city small{margin-left:auto;color:var(--muted);font-size:12px;font-weight:500;font-family:"Inter",sans-serif}
+.cico{flex:none}
+.hero{display:block;width:100%;aspect-ratio:1280/650;object-fit:cover;border-radius:20px;margin:0 0 18px;background:var(--card);position:relative}
+.hint{color:var(--muted);font-size:13px;line-height:1.5;margin:6px 4px}
+.fab{position:fixed;right:max(18px,calc(50% - 242px));bottom:calc(100px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--grad2);color:#fff;font-size:34px;line-height:1;display:grid;place-items:center;text-align:center;box-shadow:0 8px 24px rgba(255,61,129,.35);z-index:6}
+.shade{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.shade.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;width:100%;max-width:520px;bottom:0;max-height:92vh;overflow:auto;background:var(--bg);border-top-left-radius:28px;border-top-right-radius:28px;border:1px solid var(--line);transform:translate(-50%,105%);transition:transform .25s ease;z-index:11;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.sheet.open{transform:translate(-50%,0)}
+.cover{height:190px;background:var(--grad2);position:relative;display:grid;place-items:center;border-top-left-radius:28px;border-top-right-radius:28px;overflow:hidden}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,var(--bg))}
+.sbody{padding:0 20px}
+.sbody.pad{padding-top:24px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.chip{border:1px solid #555566;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500}
+.chip.sp{border-color:#ffd23d;color:#ffd23d}
+.sbody h3{margin:0 0 14px;font-family:var(--display);font-size:28px;line-height:1.15;font-weight:600}
+.row{display:flex;gap:12px;align-items:flex-start;margin:11px 0;font-size:15px}
+.row svg{width:20px;height:20px;flex:none;color:var(--muted);margin-top:1px}
+.desc{color:var(--muted);font-size:14px;line-height:1.5;margin:14px 0 18px}
+.btn{width:100%;display:block;text-align:center;border-radius:16px;padding:15px;font-weight:600;font-size:15px;margin-top:10px}
+.btn.main{background:var(--grad2);color:#fff}
+.btn.sec{background:var(--card);border:1px solid var(--line)}
+.btn.going{background:#1fbf75;color:#04140c}
+.btn.danger{background:#2a1218;border:1px solid #5a1f2c;color:#ff6b86}
+.kinds{display:flex;gap:8px;margin:14px 0 2px}
+.kinds button{flex:1;text-align:center;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;font-weight:600}
+.kinds button.on{background:var(--grad2);border-color:transparent;color:#fff}
+label{display:block;font-size:12px;color:var(--muted);margin:14px 0 6px;letter-spacing:.04em}
+.inp{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;color:var(--text);font-size:16px;outline:none}
+.inp:focus{border-color:#ff3d81}
+textarea.inp{font:inherit;font-size:16px;line-height:1.4;resize:none;display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--text);margin:18px 0 6px;letter-spacing:0}
+.chk input{width:20px;height:20px;accent-color:#ff3d81}
+.spin{margin:80px auto;width:36px;height:36px;border-radius:50%;border:4px solid var(--line);border-top-color:#ff3d81;animation:r 1s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="tabbar" id="tabbar" hidden></nav>
+<div class="shade" id="shade"></div>
+<div class="sheet" id="sheet"></div>
+
+<script>
+/* ================= НАСТРОЙКИ ================= */
+const CONFIG = {
+  SHEET_ID: "ВСТАВЬТЕ_ID_ТАБЛИЦЫ",   // ID вашей Google Таблицы
+  RUNS_SHEET: "Пробежки",
+  CLUBS_SHEET: "Клубы",
+  HORIZON_DAYS: 45,                  // на сколько дней вперёд разворачиваем повторы
+  // Города в приложении (в этом порядке). Названия в таблице должны совпадать буква в букву.
+  CITY_LIST: ["Санкт-Петербург","Москва","Казань","Екатеринбург","Омск","Нижний Новгород","Новосибирск"],
+  CITY_COLORS: {
+    "Санкт-Петербург":"#2fa8ff","Москва":"#ff2d55","Казань":"#ffd23d","Екатеринбург":"#3ddc97",
+    "Омск":"#ff8a3d","Нижний Новгород":"#19d3da","Новосибирск":"#a974ff"
+  }
+};
+/* ============================================== */
+
+const MONTHS = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const WD = ["пн","вт","ср","чт","пт","сб","вс"];
+const WD_KEYS = {пн:0,по:0,вт:1,ср:2,чт:3,че:3,пт:4,пя:4,сб:5,су:5,вс:6,во:6};
+
+const tg = (window.Telegram && window.Telegram.WebApp) || null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const S = { view:"events", city:"", saved:new Set(), own:[], runs:[], events:[], clubs:{}, f:{ type:"", dist:"", pace:"", special:false }, sheet:false, kind:"Пробежка" };
+
+/* ---------- иконки ---------- */
+const IC = {
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  pace:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c.5-4 3-6 6-6s5.5 2 6 6M15 15c3 0 5 1.5 6 5"/></svg>',
+  dist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18.5" r="2"/><circle cx="18" cy="5.5" r="2"/><path d="M8 18.5h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>'
+};
+const NAV = {
+  events: '<svg viewBox="0 0 36 28"><path class="sl" d="M2 10h8" stroke="#c47dff" stroke-width="1.9" stroke-linecap="round" fill="none"/><path class="sl" d="M3.5 14h6.5" stroke="#ffa45c" stroke-width="1.9" stroke-linecap="round" fill="none"/><path class="sl" d="M2 18h7" stroke="#3de0d0" stroke-width="1.9" stroke-linecap="round" fill="none"/><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="13" y="7" width="20" height="17" rx="3.2"/><path d="M13 12.6h20M18.5 4.4v4.2M27.5 4.4v4.2"/></g><g fill="currentColor"><circle cx="18.5" cy="16.3" r="1.15"/><circle cx="23" cy="16.3" r="1.15"/><circle cx="27.5" cy="16.3" r="1.15"/><circle cx="18.5" cy="20.4" r="1.15"/><circle cx="23" cy="20.4" r="1.15"/><circle cx="27.5" cy="20.4" r="1.15"/></g></svg>',
+  mine: '<svg viewBox="0 0 36 28"><path class="sl" d="M5 9h7" stroke="#c47dff" stroke-width="1.9" stroke-linecap="round" fill="none"/><path class="sl" d="M2 13h8.5" stroke="#ffa45c" stroke-width="1.9" stroke-linecap="round" fill="none"/><path class="sl" d="M3.5 17h6.5" stroke="#ff5c6c" stroke-width="1.9" stroke-linecap="round" fill="none"/><path class="sl" d="M5.5 21h5.5" stroke="#3de0d0" stroke-width="1.9" stroke-linecap="round" fill="none"/><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 23V12.8Q12 11.4 13.4 11.4H16.6Q17.8 15.2 21.6 14.6L22.6 8.8Q22.9 7.8 23.9 8.2L27 9.6L33.2 15Q35 16.6 35 19.2V23Z"/><path d="M12 20.4H35"/><path d="M25.4 11.6L23.4 14.2M28 13.4L26 16M30.4 15.4L28.6 17.6"/></g></svg>'
+};
+const LOGO = '<svg width="38" height="38" viewBox="0 0 40 40"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ff3d81"/><stop offset=".5" stop-color="#ffd23d"/><stop offset="1" stop-color="#2fa8ff"/></linearGradient></defs><rect x="2" y="2" width="36" height="36" rx="10" fill="#14141a" stroke="#2a2a35"/><rect x="10" y="10" width="20" height="20" rx="6" transform="rotate(45 20 20)" fill="none" stroke="url(#g)" stroke-width="4" stroke-dasharray="3.872 1.936" stroke-dashoffset="3.744"/></svg>';
+
+/* Иконки достопримечательностей: Петербург — разводные мосты, Москва — Покровский собор, Казань — Кул-Шариф,
+   Екатеринбург — небоскрёб, Омск — Успенский собор, Нижний Новгород — кремль, Новосибирск — оперный театр. */
+const CITY_ICONS = {
+  "Санкт-Петербург": '<path d="M7.5 20L10.3 4.8l1.7.5L10 20z"/><path d="M20.5 20L17.7 4.8l-1.7.5L18 20z"/><path d="M2.5 20H10M18 20h7.5"/><path d="M7 20v4.5M21 20v4.5"/><path d="M3 26.5c1.5-1.3 3-1.3 4.5 0s3 1.3 4.5 0 3-1.3 4.5 0 3 1.3 4.5 0 3-1.3 4.5 0"/>',
+  "Омск": '<path d="M3.5 25.5h21"/><path d="M5 25.5V19h18v6.5"/><path d="M10.5 19v-6h7v6"/><path d="M10 13c0-3.5 1.8-5.5 4-6.5 2.2 1 4 3 4 6.5"/><path d="M14 6.5V3M12.5 4.5h3"/><path d="M5.5 19v-3h4v3"/><path d="M5.4 16c0-1.8.9-3 2.1-3.6 1.2.6 2.1 1.8 2.1 3.6"/><path d="M7.5 12.4v-1.8"/><path d="M18.5 19v-3h4v3"/><path d="M18.4 16c0-1.8.9-3 2.1-3.6 1.2.6 2.1 1.8 2.1 3.6"/><path d="M20.5 12.4v-1.8"/><path d="M12.2 25.5v-3a1.8 1.8 0 0 1 3.6 0v3"/>',
+  "Москва": '<path d="M3.5 25.5h21"/><path d="M5 25.5V20h18v5.5"/><path d="M11 20v-7h6v7"/><path d="M14 3.2c2.2 2.7 3.5 5 3.5 6.8 0 1.3-1.5 2.2-3.5 2.2S10.5 11.3 10.5 10c0-1.8 1.3-4.1 3.5-6.8z"/><path d="M14 1.5v1.7"/><path d="M5.2 20v-3.2h3.6V20"/><path d="M7 11.8c1.2 1.4 1.8 2.5 1.8 3.4 0 .8-.8 1.6-1.8 1.6s-1.8-.8-1.8-1.6c0-.9.6-2 1.8-3.4z"/><path d="M19.2 20v-3.2h3.6V20"/><path d="M21 11.8c1.2 1.4 1.8 2.5 1.8 3.4 0 .8-.8 1.6-1.8 1.6s-1.8-.8-1.8-1.6c0-.9.6-2 1.8-3.4z"/>',
+  "Казань": '<path d="M3.5 25.5h21"/><path d="M10 25.5v-9"/><path d="M18 25.5v-9"/><path d="M10 16.5c0-4.5 1.8-6.8 4-8.5 2.2 1.7 4 4 4 8.5"/><path d="M14 8V5"/><path d="M5.5 25.5V11.5h2v14"/><path d="M6.5 11.5V8"/><path d="M20.5 25.5V11.5h2v14"/><path d="M21.5 11.5V8"/>',
+  "Екатеринбург": '<path d="M6.5 25.5h15"/><path d="M10 25.5V9l4-5.8L18 9v16.5"/><path d="M10 13.5h8M10 18h8M10 22h8"/><path d="M14 3.2V1"/>',
+  "Нижний Новгород": '<path d="M3.5 25.5h21"/><path d="M8 25.5V12.5h12v13"/><path d="M7 12.5h14"/><path d="M7 12.5V9h3v3.5M12.5 12.5V9h3v3.5M18 12.5V9h3v3.5"/><path d="M11.8 25.5v-4.5a2.2 2.2 0 0 1 4.4 0v4.5"/>',
+  "Новосибирск": '<path d="M3.5 25.5h21"/><path d="M5 25.5v-6h18v6"/><path d="M6.5 19.5c0-8 3.7-13 7.5-13s7.5 5 7.5 13"/><path d="M14 6.5V3.5"/><path d="M10 19.5v6M14 19.5v6M18 19.5v6"/>',
+  "_": '<path d="M3.5 25.5h21"/><path d="M5 25.5V14h5v11.5"/><path d="M10 25.5V8h6v17.5"/><path d="M16 25.5V12h6v13.5"/><path d="M12 12h2M12 16h2M12 20h2M18 16h2M18 20h2"/>'
+};
+const cityColor = c => CONFIG.CITY_COLORS[c] || "#9a9aaa";
+const cityIcon = (c, size = 32) => `<svg class="cico" width="${size}" height="${size}" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:${cityColor(c)}">${CITY_ICONS[c] || CITY_ICONS._}</svg>`;
+
+/* ---------- хранилище (CloudStorage Telegram, иначе localStorage) ---------- */
+const store = {
+  cloud: !!(tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9")),
+  get(keys){
+    return new Promise(res => {
+      if (this.cloud) { tg.CloudStorage.getItems(keys, (e, v) => res(e ? {} : (v || {}))); return; }
+      const o = {}; keys.forEach(k => { try { o[k] = localStorage.getItem(k) || ""; } catch(e){ o[k] = ""; } }); res(o);
+    });
+  },
+  set(k, v){
+    if (this.cloud) { tg.CloudStorage.setItem(k, v); return; }
+    try { localStorage.setItem(k, v); } catch(e){}
+  }
+};
+/* Свои пробежки и тренировки: хранятся только у самого пользователя (в его Telegram), другим не видны */
+const ownStore = {
+  async load(){
+    if (store.cloud){
+      const keys = await new Promise(res => tg.CloudStorage.getKeys((e, k) => res(e ? [] : (k || []))));
+      const ks = keys.filter(k => k.indexOf("own_") === 0);
+      if (!ks.length) return [];
+      const vals = await store.get(ks);
+      return ks.map(k => { try { return JSON.parse(vals[k]); } catch(e){ return null; } }).filter(Boolean);
+    }
+    try { return JSON.parse(localStorage.getItem("own") || "[]"); } catch(e){ return []; }
+  },
+  put(item){ if (store.cloud) tg.CloudStorage.setItem("own_" + item.id, JSON.stringify(item)); else this.flush(); },
+  del(id){ if (store.cloud) tg.CloudStorage.removeItem("own_" + id); else this.flush(); },
+  flush(){ try { localStorage.setItem("own", JSON.stringify(S.own)); } catch(e){} }
+};
+
+/* ---------- чтение Google Таблицы ---------- */
+function parseCSV(t){
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < t.length; i++){
+    const c = t[i];
+    if (q){ if (c === '"'){ if (t[i+1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ','){ row.push(f); f = ""; }
+    else if (c === '\n' || c === '\r'){ if (c === '\r' && t[i+1] === '\n') i++; row.push(f); f = ""; rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== "" || row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+function toObjects(rows){
+  if (!rows.length) return [];
+  const h = rows[0].map(s => s.trim());
+  return rows.slice(1).map((r, i) => { const o = { _row: i + 2 }; h.forEach((k, j) => o[k] = (r[j] || "").trim()); return o; });
+}
+async function fetchSheet(name){
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return toObjects(parseCSV(await r.text()));
+}
+
+/* демо-данные, пока не указан SHEET_ID */
+const DEMO_RUNS = [
+  {_row:2,"Город":"Москва","Клуб":"RunClub","Название":"Утренняя пробежка от RunClub","Тип":"Пробежка","Расстояние":"5","Дата":"","Дни":"сб","До":"","Время":"08:30","Темп":"5:30–6:00/км","Место":"Парк Горького, главный вход","Описание":"Лёгкий темп, приятная компания и красивый маршрут вдоль набережной.","Особая":""},
+  {_row:3,"Город":"Санкт-Петербург","Клуб":"Container Run Club","Название":"Городская пробежка","Тип":"Пробежка","Расстояние":"7","Дата":"","Дни":"вт, чт","До":"","Время":"19:30","Темп":"5:30/км","Место":"У контейнера на набережной","Описание":"","Особая":""},
+  {_row:4,"Город":"Санкт-Петербург","Клуб":"Container Run Club","Название":"Лонгран","Тип":"Лонгран","Расстояние":"18","Дата":"","Дни":"вс","До":"","Время":"09:00","Темп":"6:10/км","Место":"У контейнера на набережной","Описание":"Длинная воскресная пробежка.","Особая":""},
+  {_row:5,"Город":"Санкт-Петербург","Клуб":"Container Run Club","Название":"Ночной забег по разводным мостам","Тип":"Пробежка","Расстояние":"10","Дата":"","Дни":"сб","До":"","Время":"23:30","Темп":"6:00/км","Место":"Дворцовая площадь","Описание":"Бежим к разводке мостов.","Особая":"да"},
+  {_row:6,"Город":"Казань","Клуб":"Kazan Runners","Название":"Вечерний бег","Тип":"Пробежка","Расстояние":"6","Дата":"","Дни":"ср","До":"","Время":"20:00","Темп":"5:45/км","Место":"Кремлёвская набережная","Описание":"","Особая":""}
+];
+const DEMO_CLUBS = [
+  {"Клуб":"RunClub","Логотип":"","Соцсети":"https://t.me/telegram"},
+  {"Клуб":"Container Run Club","Логотип":"","Соцсети":"https://t.me/telegram"},
+  {"Клуб":"Kazan Runners","Логотип":"","Соцсети":""}
+];
+
+/* ---------- даты и разбор значений ---------- */
+function parseDate(s){
+  s = (s || "").trim(); let m;
+  if ((m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{2,4})$/))){ let y = +m[3]; if (y < 100) y += 2000; return new Date(y, +m[2]-1, +m[1]); }
+  if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return new Date(+m[1], +m[2]-1, +m[3]);
+  return null;
+}
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const fromIso = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmtDay = d => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+const dow = d => (d.getDay() + 6) % 7;
+function startOfToday(){ const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+function parseDays(s){
+  const set = new Set();
+  (s || "").toLowerCase().split(/[,;\s]+/).forEach(t => { const k = t.slice(0,2); if (k in WD_KEYS) set.add(WD_KEYS[k]); });
+  return set;
+}
+const parseNum = s => { const m = String(s || "").replace(",", ".").match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; };
+const parsePace = s => { const m = String(s || "").match(/(\d{1,2})[:.](\d{2})/); return m ? +m[1] + (+m[2]) / 60 : null; };
+const fmtDist = s => /^\s*\d+([.,]\d+)?\s*$/.test(s) ? String(s).trim().replace(",", ".") + " км" : String(s).trim();
+const fmtPace = s => /\/|км/.test(s) ? s : s + "/км";
+
+function buildEvents(runs){
+  const today = startOfToday(), out = [];
+  runs.forEach(r => {
+    if (!r["Город"] || !r["Клуб"]) return;
+    const base = {
+      row:r._row, city:r["Город"], club:r["Клуб"], title:r["Название"], type:r["Тип"] || "",
+      time:r["Время"], pace:r["Темп"], place:r["Место"], desc:r["Описание"],
+      dist: r["Расстояние"] ? fmtDist(r["Расстояние"]) : "", distNum: parseNum(r["Расстояние"]), paceNum: parsePace(r["Темп"]),
+      special: /^(да|yes|true|1|\+|✓|✔)/i.test((r["Особая"] || "").trim()), own:false
+    };
+    const days = parseDays(r["Дни"]);
+    if (days.size){
+      const until = r["До"] ? parseDate(r["До"]) : null;
+      for (let i = 0; i <= CONFIG.HORIZON_DAYS; i++){
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+        if (days.has(dow(d)) && (!until || d <= until)) out.push({ ...base, date:d, id:`${iso(d)}|${r._row}` });
+      }
+    } else {
+      const d = parseDate(r["Дата"]);
+      if (d && d >= today) out.push({ ...base, date:d, id:`${iso(d)}|${r._row}` });
+    }
+  });
+  return out;
+}
+function buildOwn(){
+  const today = startOfToday(), out = [];
+  S.own.forEach(o => {
+    const start = fromIso(o.date);
+    const base = {
+      row:o.id, city:o.city, club:"Моя " + o.kind.toLowerCase(), title:o.title, type:o.kind, time:o.time,
+      pace:o.pace || "", place:o.place || "", desc:o.desc || "", dist:o.dist ? fmtDist(o.dist) : "", distNum:parseNum(o.dist),
+      paceNum:parsePace(o.pace), special:false, own:true, ownId:o.id, repeat:!!o.repeat
+    };
+    if (o.repeat){
+      for (let i = 0; i <= CONFIG.HORIZON_DAYS; i++){
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+        if (d >= start && dow(d) === dow(start)) out.push({ ...base, date:d, id:`${iso(d)}|${o.id}` });
+      }
+    } else if (start >= today) out.push({ ...base, date:start, id:`${iso(start)}|${o.id}` });
+  });
+  return out;
+}
+function refreshEvents(){
+  S.events = buildEvents(S.runs).concat(buildOwn());
+  S.events.sort((a, b) => a.date - b.date || String(a.time).localeCompare(String(b.time)));
+}
+const cities = () => CONFIG.CITY_LIST;
+const hasRuns = c => S.events.some(e => e.city === c && !e.own);
+function fixLogo(u){
+  if (!u) return "";
+  const m = u.match(/\/d\/([\w-]+)/) || u.match(/[?&]id=([\w-]+)/);
+  return (/drive\.google\.com/.test(u) && m) ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800` : u;
+}
+function openLink(u){
+  if (!/^https?:\/\//.test(u)) return;
+  if (tg){ if (/^https?:\/\/t\.me\//.test(u)) tg.openTelegramLink(u); else tg.openLink(u); }
+  else window.open(u, "_blank");
+}
+const haptic = () => { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred("light"); } catch(e){} };
+const persistSaved = () => store.set("saved", JSON.stringify([...S.saved]));
+const notify = m => { try { if (tg && tg.showAlert && tg.isVersionAtLeast("6.2")) { tg.showAlert(m); return; } } catch(e){} alert(m); };
+const confirmBox = (m, cb) => { try { if (tg && tg.showConfirm && tg.isVersionAtLeast("6.2")) { tg.showConfirm(m, ok => ok && cb()); return; } } catch(e){} if (confirm(m)) cb(); };
+
+/* ---------- фильтры ---------- */
+const num = v => typeof v === "number";
+const DIST_B = [
+  ["d1", "до 5 км", e => num(e.distNum) && e.distNum <= 5],
+  ["d2", "5–10 км", e => num(e.distNum) && e.distNum > 5 && e.distNum <= 10],
+  ["d3", "10–21 км", e => num(e.distNum) && e.distNum > 10 && e.distNum <= 21.1],
+  ["d4", "более 21 км", e => num(e.distNum) && e.distNum > 21.1]
+];
+const PACE_B = [
+  ["p1", "быстрее 5:00", e => num(e.paceNum) && e.paceNum < 5],
+  ["p2", "5:00–6:00", e => num(e.paceNum) && e.paceNum >= 5 && e.paceNum < 6],
+  ["p3", "6:00–7:00", e => num(e.paceNum) && e.paceNum >= 6 && e.paceNum < 7],
+  ["p4", "медленнее 7:00", e => num(e.paceNum) && e.paceNum >= 7]
+];
+const bucket = (B, k) => B.find(b => b[0] === k);
+function passes(e){
+  const f = S.f;
+  if (f.type && e.type !== f.type) return false;
+  if (f.dist && !bucket(DIST_B, f.dist)[2](e)) return false;
+  if (f.pace && !bucket(PACE_B, f.pace)[2](e)) return false;
+  if (f.special && !e.special) return false;
+  return true;
+}
+const anyFilter = () => !!(S.f.type || S.f.dist || S.f.pace || S.f.special);
+
+/* ---------- экраны ---------- */
+const stripes = '<div class="stripes">' + [["#ff3d81",90,0],["#ff8a3d",130,12],["#ffd23d",70,24],["#3ddc97",150,36],["#2fa8ff",100,48],["#7a5cff",60,60]].map(([c,w,t]) => `<i style="background:${c};width:${w}px;top:${t+14}px"></i>`).join("") + '</div>';
+const brand = `<div class="brand">${LOGO}<b>RunVerse</b></div>`;
+const head = title => `${stripes}${brand}<h1>${title}</h1><div class="bar"></div>`;
+const TABS = [["events", "Расписание", NAV.events], ["mine", "Мои пробежки", NAV.mine]];
+const fab = '<button class="fab" data-a="add" aria-label="Добавить свою пробежку">+</button>';
+
+function dayGroups(list){
+  let h = "", last = "";
+  list.forEach(e => {
+    const k = iso(e.date);
+    if (k !== last){ last = k; h += `<div class="day">${fmtDay(e.date)}, ${WD[dow(e.date)]}</div>`; }
+    h += evCard(e);
+  });
+  return h;
+}
+function evCard(e){
+  const meta = [e.dist, e.pace ? fmtPace(e.pace) : "", e.place].filter(Boolean).join(" · ");
+  const tags = (e.special ? '<span class="tag sp">✨ Особая</span>' : "") + (e.own ? '<span class="tag">Моя</span>' : "") + (e.type && !e.own ? `<span class="tag">${esc(e.type)}</span>` : "");
+  const going = e.own || S.saved.has(e.id);
+  return `<button class="ev" data-a="open" data-id="${esc(e.id)}">
+    <div class="time">${esc(e.time)}</div>
+    <div class="info"><b>${esc(e.own ? e.title : e.club)}</b><span>${esc(e.own ? e.type : e.title)}</span>${meta ? `<span>${esc(meta)}</span>` : ""}${tags ? `<div class="tags">${tags}</div>` : ""}</div>
+    ${going ? '<div class="go">✓</div>' : ""}
+  </button>`;
+}
+function filterBar(){
+  const f = S.f;
+  return `<div class="fchips">
+    <button class="fchip ${f.type ? "on" : ""}" data-a="filter" data-v="type">${esc(f.type || "Тип")} ▾</button>
+    <button class="fchip ${f.dist ? "on" : ""}" data-a="filter" data-v="dist">${f.dist ? bucket(DIST_B, f.dist)[1] : "Расстояние"} ▾</button>
+    <button class="fchip ${f.pace ? "on" : ""}" data-a="filter" data-v="pace">${f.pace ? bucket(PACE_B, f.pace)[1] : "Темп"} ▾</button>
+    <button class="fchip ${f.special ? "on" : ""}" data-a="special">✨ Особые</button>
+    ${anyFilter() ? '<button class="fchip" data-a="resetf">Сбросить</button>' : ""}
+  </div>`;
+}
+function viewEvents(){
+  const list = S.events.filter(e => e.city === S.city && passes(e));
+  let h = head("Расписание") +
+    `<div class="toprow"><button class="pill" data-a="view" data-v="city">${cityIcon(S.city, 22)}${esc(S.city)} ▾</button></div>` + filterBar();
+  if (!list.length) h += `<div class="empty"><big>🏃</big>${anyFilter() ? "Ничего не найдено.<br>Попробуй изменить или сбросить фильтры." : "В этом городе пока нет ближайших пробежек.<br>Добавь свою кнопкой «+»."}</div>`;
+  else h += dayGroups(list);
+  return h + fab;
+}
+function viewMine(){
+  const list = S.events.filter(e => e.own || S.saved.has(e.id));
+  let h = head("Мои пробежки");
+  if (!list.length) h += `<div class="empty"><big>📋</big>Здесь появятся пробежки, на которые ты идёшь, и твои собственные.<br>Открой пробежку в расписании и нажми «Я иду» или добавь свою кнопкой «+».</div>`;
+  else h += dayGroups(list);
+  return h + fab;
+}
+function cityList(){
+  return cities().map(c => `<button class="city ${c === S.city ? "on" : ""}" data-a="city" data-v="${esc(c)}">
+    <span class="radio"></span>${cityIcon(c)}${esc(c)}${hasRuns(c) ? "" : "<small>скоро</small>"}</button>`).join("");
+}
+function viewCity(){
+  return `${stripes}${brand}${S.city ? '<button class="back" data-a="view" data-v="events">‹ К расписанию</button>' : ""}
+    ${S.city ? "" : '<img class="hero" src="welcome.png" alt="" onerror="this.remove()">'}
+    <h1>Выбери<br>свой город</h1><div class="bar"></div>${cityList()}
+    <p class="hint">${S.city ? "Покажем пробежки только из выбранного города. Город можно сменить в любой момент." : "Выбери город, чтобы увидеть расписание пробежек."}</p>`;
+}
+function render(){
+  if (!S.city) S.view = "city";
+  $("#app").innerHTML = S.view === "city" ? viewCity() : S.view === "mine" ? viewMine() : viewEvents();
+  const bar = $("#tabbar");
+  if (S.view === "city") bar.hidden = true;
+  else {
+    bar.hidden = false;
+    bar.innerHTML = TABS.map(([k, t, ico]) => `<button class="${S.view === k ? "on" : ""}" data-a="view" data-v="${k}">${ico}${t}</button>`).join("");
+  }
+  updateBack();
+}
+
+/* ---------- нижние листы: пробежка, фильтр, добавление ---------- */
+function showSheet(html){
+  $("#sheet").innerHTML = html;
+  $("#sheet").scrollTop = 0;
+  $("#sheet").classList.add("open"); $("#shade").classList.add("open");
+  S.sheet = true; updateBack();
+}
+function closeSheet(){
+  $("#sheet").classList.remove("open"); $("#shade").classList.remove("open");
+  S.sheet = false; updateBack();
+}
+function openEvent(id){
+  const e = S.events.find(x => x.id === id); if (!e) return;
+  const club = S.clubs[e.club] || {};
+  const logo = e.own ? "" : fixLogo(club["Логотип"]);
+  const going = S.saved.has(id);
+  const link = club["Соцсети"] || "";
+  const chips = e.own
+    ? `<span class="chip">${esc(e.type)}</span><span class="chip">📍 ${esc(e.city)}</span><span class="chip">Моя</span>`
+    : `<span class="chip">${esc(e.club)}</span><span class="chip">📍 ${esc(e.city)}</span>${e.type ? `<span class="chip">${esc(e.type)}</span>` : ""}${e.special ? '<span class="chip sp">✨ Особая</span>' : ""}`;
+  showSheet(`
+    <div class="cover">${logo ? `<img src="${esc(logo)}" alt="" onerror="this.remove()">` : ""}</div>
+    <div class="sbody">
+      <div class="chips">${chips}</div>
+      <h3>${esc(e.title || e.club)}</h3>
+      <div class="row">${IC.cal}<span>${fmtDay(e.date)}, ${WD[dow(e.date)]}${e.repeat ? " · каждую неделю" : ""}</span></div>
+      <div class="row">${IC.clock}<span>${esc(e.time)}</span></div>
+      ${e.place ? `<div class="row">${IC.pin}<span>${esc(e.place)}</span></div>` : ""}
+      ${e.dist ? `<div class="row">${IC.dist}<span>Расстояние: ${esc(e.dist)}</span></div>` : ""}
+      ${e.pace ? `<div class="row">${IC.pace}<span>Планируемый темп: ${esc(fmtPace(e.pace))}</span></div>` : ""}
+      ${e.desc ? `<div class="desc">${esc(e.desc)}</div>` : ""}
+      ${e.own
+        ? `<button class="btn danger" data-a="delown" data-id="${esc(e.ownId)}">${e.repeat ? "Удалить (все повторы)" : "Удалить"}</button>`
+        : `<button class="btn ${going ? "going" : "sec"}" data-a="going" data-id="${esc(id)}">${going ? "Я иду ✓" : "Я иду"}</button>
+           ${/^https?:\/\//.test(link) ? `<button class="btn main" data-a="link" data-v="${esc(link)}">Перейти в соцсети клуба ↗</button>` : ""}`}
+      <button class="btn sec" data-a="close">Назад к расписанию</button>
+    </div>`);
+}
+function openFilter(kind){
+  const titles = { type:"Тип", dist:"Расстояние", pace:"Планируемый темп" };
+  let opts;
+  if (kind === "type") {
+    const types = [...new Set(S.events.filter(e => e.city === S.city && e.type).map(e => e.type))].sort((a, b) => a.localeCompare(b, "ru"));
+    opts = types.map(t => [t, t]);
+  } else opts = (kind === "dist" ? DIST_B : PACE_B).map(b => [b[0], b[1]]);
+  const cur = S.f[kind];
+  const row = (v, label) => `<button class="opt ${cur === v ? "on" : ""}" data-a="setf" data-k="${kind}" data-v="${esc(v)}"><span class="radio"></span>${esc(label)}</button>`;
+  showSheet(`<div class="sbody pad"><h3>${titles[kind]}</h3>
+    ${row("", "Любой")}${opts.map(o => row(o[0], o[1])).join("")}
+    ${kind === "type" && !opts.length ? '<p class="hint">Пока нет вариантов: в таблице у пробежек не заполнена колонка «Тип».</p>' : ""}
+    <button class="btn sec" data-a="close">Закрыть</button></div>`);
+}
+function openAdd(){
+  S.kind = "Пробежка";
+  showSheet(`<div class="sbody pad"><h3>Добавить в расписание</h3>
+    <p class="hint" style="margin:0">Это личная запись: её видишь только ты, другим пользователям она не показывается.</p>
+    <div class="kinds"><button class="on" data-a="kind" data-v="Пробежка">Пробежка</button><button data-a="kind" data-v="Тренировка">Тренировка</button></div>
+    <label>Название</label><input class="inp" id="f_title" type="text" maxlength="60" placeholder="Например, лёгкая пробежка">
+    <div class="two"><div><label>Дата</label><input class="inp" id="f_date" type="date" value="${iso(startOfToday())}"></div>
+    <div><label>Время</label><input class="inp" id="f_time" type="time" value="19:00"></div></div>
+    <div class="two"><div><label>Расстояние, км</label><input class="inp" id="f_dist" type="text" inputmode="decimal" maxlength="8" placeholder="Необязательно"></div>
+    <div><label>Темп, мин/км</label><input class="inp" id="f_pace" type="text" maxlength="12" placeholder="Например, 5:30"></div></div>
+    <label>Место</label><input class="inp" id="f_place" type="text" maxlength="80" placeholder="Необязательно">
+    <label>Описание</label><textarea class="inp" id="f_desc" rows="3" maxlength="300" placeholder="Необязательно"></textarea>
+    <label class="chk"><input id="f_repeat" type="checkbox">Повторять каждую неделю</label>
+    <button class="btn main" data-a="saveown">Сохранить</button>
+    <button class="btn sec" data-a="close">Отмена</button></div>`);
+}
+function saveOwn(){
+  const val = id => ($("#" + id).value || "").trim();
+  const title = val("f_title"), date = val("f_date"), time = val("f_time"), repeat = $("#f_repeat").checked;
+  if (!title) return notify("Введи название.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return notify("Укажи дату.");
+  if (!/^\d{2}:\d{2}$/.test(time)) return notify("Укажи время.");
+  if (!repeat && fromIso(date) < startOfToday()) return notify("Эта дата уже прошла.");
+  const item = { id:Date.now().toString(36), kind:S.kind, title, date, time, dist:val("f_dist"), pace:val("f_pace"), place:val("f_place"), desc:val("f_desc"), repeat, city:S.city };
+  S.own.push(item); ownStore.put(item);
+  refreshEvents(); closeSheet(); S.view = "mine"; render(); window.scrollTo(0, 0);
+}
+
+/* ---------- кнопка «Назад» Telegram ---------- */
+function updateBack(){
+  if (!tg || !tg.BackButton) return;
+  const need = S.sheet || (S.city && S.view === "city");
+  if (need) tg.BackButton.show(); else tg.BackButton.hide();
+}
+function onBack(){
+  if (S.sheet) closeSheet();
+  else if (S.city && S.view === "city"){ S.view = "events"; render(); window.scrollTo(0, 0); }
+}
+
+/* ---------- события интерфейса ---------- */
+document.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-a]");
+  if (!t){ if (ev.target.id === "shade") closeSheet(); return; }
+  const a = t.dataset.a, v = t.dataset.v, id = t.dataset.id;
+  haptic();
+  if (a === "view"){ S.view = v; render(); window.scrollTo(0, 0); }
+  else if (a === "city"){ S.city = v; store.set("city", v); S.f = { type:"", dist:"", pace:"", special:false }; S.view = "events"; render(); window.scrollTo(0, 0); }
+  else if (a === "open") openEvent(id);
+  else if (a === "close") closeSheet();
+  else if (a === "link") openLink(v);
+  else if (a === "going"){ S.saved.has(id) ? S.saved.delete(id) : S.saved.add(id); persistSaved(); openEvent(id); render(); }
+  else if (a === "filter") openFilter(v);
+  else if (a === "setf"){ S.f[t.dataset.k] = v; closeSheet(); render(); }
+  else if (a === "special"){ S.f.special = !S.f.special; render(); }
+  else if (a === "resetf"){ S.f = { type:"", dist:"", pace:"", special:false }; render(); }
+  else if (a === "add") openAdd();
+  else if (a === "kind"){ S.kind = v; document.querySelectorAll(".kinds button").forEach(b => b.classList.toggle("on", b.dataset.v === S.kind)); }
+  else if (a === "saveown") saveOwn();
+  else if (a === "delown") confirmBox("Удалить эту запись?", () => {
+    S.own = S.own.filter(o => o.id !== id); ownStore.del(id);
+    refreshEvents(); closeSheet(); render();
+  });
+});
+
+/* ---------- запуск ---------- */
+async function load(){
+  $("#app").innerHTML = '<div class="spin"></div>';
+  try {
+    const demo = CONFIG.SHEET_ID.indexOf("ВСТАВЬТЕ") === 0;
+    const [runs, clubs] = demo ? [DEMO_RUNS, DEMO_CLUBS] : await Promise.all([fetchSheet(CONFIG.RUNS_SHEET), fetchSheet(CONFIG.CLUBS_SHEET)]);
+    S.runs = runs;
+    S.clubs = {}; clubs.forEach(c => { if (c["Клуб"]) S.clubs[c["Клуб"]] = c; });
+    refreshEvents();
+    const today = iso(startOfToday());
+    S.saved = new Set([...S.saved].filter(id => id.split("|")[0] >= today));
+    if (S.city && !cities().includes(S.city)) S.city = "";
+    S.view = S.city ? "events" : "city";   // при первом входе открывается выбор города
+    render();
+  } catch (err) {
+    $("#app").innerHTML = `${brand}<div class="empty"><big>⚠️</big>Не удалось загрузить расписание.<br>Проверьте интернет и доступ к таблице.<br><br><button class="btn main" id="retry" style="max-width:240px;margin:0 auto">Повторить</button></div>`;
+    $("#retry").onclick = load;
+  }
+}
+async function init(){
+  if (tg){
+    tg.ready(); tg.expand();
+    try { tg.setHeaderColor("#09090c"); tg.setBackgroundColor("#09090c"); } catch(e){}
+    if (tg.BackButton) tg.BackButton.onClick(onBack);
+  }
+  const st = await store.get(["city", "saved"]);
+  S.city = st.city || "";
+  try { S.saved = new Set(JSON.parse(st.saved || "[]")); } catch(e){ S.saved = new Set(); }
+  try { S.own = await ownStore.load(); } catch(e){ S.own = []; }
+  load();
+}
+init();
+</script>
+</body>
+</html>
